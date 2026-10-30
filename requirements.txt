@@ -1,0 +1,7 @@
+streamlit>=1.35
+librosa>=0.10
+numpy
+plotly
+anthropic
+# 歌詞の書き起こしを使う場合のみ(任意)
+# faster-whisper
