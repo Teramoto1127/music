@@ -3,5 +3,6 @@ librosa>=0.10
 numpy
 plotly
 anthropic
+requests
 # 歌詞の書き起こしを使う場合のみ(任意)
 # faster-whisper

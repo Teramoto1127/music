@@ -12,6 +12,11 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
+from metadata_mode import render_metadata_mode
+
+MODE_FILE = "ファイルを分析(音声解析)"
+MODE_URL = "URL・曲名から解説(AI)"
+
 SR = 22050
 HOP = 512
 NOTE_NAMES = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
@@ -243,16 +248,23 @@ def main():
     st.caption("MV(動画)や音声をアップロードすると、テンポ・キー・構成・コード進行を推定し、AIが曲を解説します。")
 
     with st.sidebar:
+        mode = st.radio("モード", [MODE_FILE, MODE_URL])
         st.header("設定")
-        max_sec = st.slider("解析する最大の長さ(秒)", 60, 600, 360, 30)
-        use_whisper = st.checkbox("歌詞を書き起こして解説に使う(Whisper・重い)", value=False)
-        whisper_size = st.selectbox("Whisperモデル", ["tiny", "base", "small", "medium"], index=2,
-                                    disabled=not use_whisper)
-        st.divider()
+        max_sec, use_whisper, whisper_size = 360, False, "small"
+        if mode == MODE_FILE:
+            max_sec = st.slider("解析する最大の長さ(秒)", 60, 600, 360, 30)
+            use_whisper = st.checkbox("歌詞を書き起こして解説に使う(Whisper・重い)", value=False)
+            whisper_size = st.selectbox("Whisperモデル", ["tiny", "base", "small", "medium"], index=2,
+                                        disabled=not use_whisper)
+            st.divider()
         st.subheader("AI解説(任意)")
         api_key = st.text_input("Anthropic APIキー", type="password",
                                 value=os.environ.get("ANTHROPIC_API_KEY", ""))
         model = st.text_input("モデル名", value="claude-sonnet-5-5")
+
+    if mode == MODE_URL:
+        render_metadata_mode(api_key, model, call_llm)
+        return
 
     up = st.file_uploader("MV・音声ファイル", type=["mp4", "mov", "mkv", "webm", "avi", "mp3", "wav", "m4a", "flac", "ogg"])
     if not up:
